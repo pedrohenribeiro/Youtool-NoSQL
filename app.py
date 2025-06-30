@@ -138,6 +138,7 @@ def main():
     channel_id, playlist_id = buscarEArmazenarCanal(yt, db, cfg['channel_url'])
     vids = armazenarVideos(yt, db, playlist_id, since_dt)
     limited_vids = vids[:10]
+    coletarComentarios(yt, db, limited_vids)
     armazenarTranscricoes(yt, db, limited_vids, cfg['transcription_lang'], cfg['transcription_dir'])
 
 if __name__ == '__main__':
