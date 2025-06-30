@@ -38,6 +38,39 @@ def ensure_indexes(db):
     db.superchats.create_index('video_id', unique=True)
 
 
+def buscarEArmazenarCanal(yt: YouTube, db, channel_url: str):
+    channel_id = yt.channel_id_from_url(channel_url)
+    info = list(yt.channels_infos([channel_id]))[0]
+    record = {
+        'channel_id': channel_id,
+        'title': info.get('title'),
+        'description': info.get('description'),
+        'custom_url': info.get('custom_url'),
+        'thumbnails': info.get('thumbnails'),
+        'stats': info.get('statistics'),
+    }
+    db.channels.update_one({'channel_id': channel_id}, {'$set': record}, upsert=True)
+    return channel_id, info.get('playlist_id')
+
+def armazenarVideos(yt, db, playlist_id, since_dt):
+    videos = []
+    for video in yt.playlist_videos(playlist_id):
+        if since_dt:
+            published = video.get('publishedAt')
+            if published and published < since_dt.isoformat():
+                continue
+        vid = video.get('video_id') or video.get('id') or video.get('videoId')
+        if vid:
+            videos.append(vid)
+            db.videos.update_one(
+                {'video_id': vid},
+                {'$set': {**video, 'video_id': vid}},
+                upsert=True
+            )
+        if len(videos) >= 10:
+            break
+    return videos
+
 def main():
     cfg = load_config()
     since_dt = None
@@ -52,6 +85,7 @@ def main():
     db = connect_mongo(cfg['mongo_uri'], cfg['db_name'])
     ensure_indexes(db)
 
+    channel_id, playlist_id = buscarEArmazenarCanal(yt, db, cfg['channel_url'])
     vids = armazenarVideos(yt, db, playlist_id, since_dt)
     limited_vids = vids[:10]
 
