@@ -71,6 +71,36 @@ def armazenarVideos(yt, db, playlist_id, since_dt):
             break
     return videos
 
+def armazenarTranscricoes(yt: YouTube, db, video_ids, lang, out_dir):
+    try:
+        import yt_dlp
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError("Para baixar transcrições, instale: pip install yt-dlp")
+    try:
+        import webvtt
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError("Para processar VTT, instale: pip install webvtt-py")
+
+    os.makedirs(out_dir, exist_ok=True)
+    for vid in video_ids:
+        for status in yt.download_transcriptions(videos_ids=[vid], language_code=lang, path=out_dir, batch_size=1):
+            print(status)
+
+        path = os.path.join(out_dir, f"{vid}.{lang}.vtt")
+        if not os.path.exists(path):
+            print(f"⚠️ Transcrição não encontrada para vídeo {vid}")
+            continue
+
+        with open(path, encoding='utf-8') as f:
+            simple = simplify_vtt(f.read())
+
+        db.transcriptions.update_one(
+            {'video_id': vid},
+            {'$set': {'video_id': vid, 'transcription': simple}},
+            upsert=True
+        )
+        print(f"Transcrição salva para vídeo {vid}")
+
 def main():
     cfg = load_config()
     since_dt = None
@@ -88,6 +118,7 @@ def main():
     channel_id, playlist_id = buscarEArmazenarCanal(yt, db, cfg['channel_url'])
     vids = armazenarVideos(yt, db, playlist_id, since_dt)
     limited_vids = vids[:10]
+    armazenarTranscricoes(yt, db, limited_vids, cfg['transcription_lang'], cfg['transcription_dir'])
 
 if __name__ == '__main__':
     main()
