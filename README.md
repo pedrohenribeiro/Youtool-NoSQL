@@ -11,13 +11,66 @@ Este projeto utiliza a biblioteca `youtool` para coletar, processar e armazenar 
 - Download e simplificação de transcrições (legendas)
 - Exportação de estatísticas em JSON
 
+### Tecnologias Utilizadas
+- Python
+- MongoDB (NoSQL)
+- YouTube Data API v3
+- youtool
+- yt-dlp (para baixar transcrições)
+- webvtt-py (para processar arquivos VTT)
+
+
+<details>
+ 
+<summary>
+ 🎥 Demonstração
+</summary>
+
+</br>
+
+Canal de Análise: [República Coisa de Nerd](https://www.youtube.com/@republicacoisadenerd).
+
+`python app.py`
+
+ https://github.com/user-attachments/assets/6b8e0561-60e8-4591-a5b8-854ad1f8b195
+
+ `/transcricoes` e `estatisticas_videos.json`
+
+https://github.com/user-attachments/assets/b33154c9-c8e6-4d62-9bae-80fe8486bb96
+
+No banco de dados
+
+<img src="https://github.com/user-attachments/assets/75870df4-652c-4c6a-8ce3-e021f6d9c896" width="880"/>
+
+
+</br>
+
+
+#### 📋 Estrutura de dados no MongoDB:
+- channels: dados do canal (ID, título, descrição, etc.)
+- videos: metadados dos vídeos (título, duração, visualizações, etc.)
+- comments: comentários dos vídeos
+- transcriptions: transcrições simplificadas dos vídeos
+
+#### 📋 Observações:
+- O script coleta no máximo 10 vídeos por execução (ajustável).
+- As transcrições dependem da disponibilidade no YouTube e da linguagem escolhida.
+- É possível usar múltiplas chaves de API (separadas por vírgula) para evitar limites de cota.
+
+</details>
+
+
+<details>
+ <summary>
+  ⚙️ Como executar o projeto
+ </summary>
+
 #### Pré-requisitos
 
 - Python 3.8+
 - Conta no [Google Cloud Console](https://console.cloud.google.com/)
 - MongoDB (local ou Atlas)
 - Biblioteca `youtool` instalada
-
 
 <details>
  <summary>
@@ -37,23 +90,6 @@ Este projeto utiliza a biblioteca `youtool` para coletar, processar e armazenar 
 </details>
 
 
-### Tecnologias Utilizadas
-- Python
-- MongoDB (NoSQL)
-- YouTube Data API v3
-- youtool
-- yt-dlp (para baixar transcrições)
-- webvtt-py (para processar arquivos VTT)
-
-
-</br>
-
-
-<details>
- <summary>
-  ⚙️ Como executar o projeto
- </summary>
- 
 #### 1. Clone o repositório
 
 ```bash
@@ -92,34 +128,6 @@ python app.py
 ```
 
 </details>
-
-
-
-<details>
- <summary>
-  📋 Estrutura dos dados e observações
- </summary>
-
-#### Estrutura dos dados no MongoDB
-
-- channels: dados do canal (ID, título, descrição, etc.)
-- videos: metadados dos vídeos (título, duração, visualizações, etc.)
-- comments: comentários dos vídeos
-- transcriptions: transcrições simplificadas dos vídeos
-
-#### Observações
-- As estatísticas dos vídeos são exportadas para um arquivo `estatisticas_videos.json`. Contém título, data de publicação, visualizações, likes e número de comentários.
-- O script coleta no máximo 10 vídeos por execução (ajustável).
-- As transcrições dependem da disponibilidade no YouTube e da linguagem escolhida.
-- É possível usar múltiplas chaves de API (separadas por vírgula) para evitar limites de cota.
-
-</details>
-
-
-
-</br>
-
-
 
 |Nome | GitHub|
 | -------- | -------- |
