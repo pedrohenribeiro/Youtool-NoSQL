@@ -1,4 +1,4 @@
-## Yotool-NoSQL
+## Youtool-NoSQL
 
 Este projeto utiliza a biblioteca `youtool` para coletar, processar e armazenar dados de canais do YouTube em um banco de dados NoSQL (MongoDB), permitindo análises sobre vídeos, estatísticas, comentários e transcrições.
 
@@ -11,12 +11,13 @@ Este projeto utiliza a biblioteca `youtool` para coletar, processar e armazenar 
 - Download e simplificação de transcrições (legendas)
 - Exportação de estatísticas em JSON
 
-### Pré-requisitos
+#### Pré-requisitos
 
 - Python 3.8+
 - Conta no [Google Cloud Console](https://console.cloud.google.com/)
 - MongoDB (local ou Atlas)
 - Biblioteca `youtool` instalada
+
 
 <details>
  <summary>
@@ -35,8 +36,24 @@ Este projeto utiliza a biblioteca `youtool` para coletar, processar e armazenar 
 
 </details>
 
-### ⚙️ Como executar o projeto
 
+### Tecnologias Utilizadas
+- Python
+- MongoDB (NoSQL)
+- YouTube Data API v3
+- youtool
+- yt-dlp (para baixar transcrições)
+- webvtt-py (para processar arquivos VTT)
+
+
+</br>
+
+
+<details>
+ <summary>
+  ⚙️ Como executar o projeto
+ </summary>
+ 
 #### 1. Clone o repositório
 
 ```bash
@@ -74,27 +91,35 @@ TRANSCRIPTION_DIR=./transcricoes
 python app.py
 ```
 
-### Estrutura dos dados no MongoDB
+</details>
+
+
+
+<details>
+ <summary>
+  📋 Estrutura dos dados e observações
+ </summary>
+
+#### Estrutura dos dados no MongoDB
+
 - channels: dados do canal (ID, título, descrição, etc.)
 - videos: metadados dos vídeos (título, duração, visualizações, etc.)
 - comments: comentários dos vídeos
 - transcriptions: transcrições simplificadas dos vídeos
 
-### Observações
+#### Observações
 - As estatísticas dos vídeos são exportadas para um arquivo `estatisticas_videos.json`. Contém título, data de publicação, visualizações, likes e número de comentários.
 - O script coleta no máximo 10 vídeos por execução (ajustável).
 - As transcrições dependem da disponibilidade no YouTube e da linguagem escolhida.
 - É possível usar múltiplas chaves de API (separadas por vírgula) para evitar limites de cota.
 
-### 🛠️ Tecnologias Utilizadas
-- Python
-- MongoDB (NoSQL)
-- YouTube Data API v3
-- youtool
-- yt-dlp (para baixar transcrições)
-- webvtt-py (para processar arquivos VTT)
+</details>
+
+
 
 </br>
+
+
 
 |Nome | GitHub|
 | -------- | -------- |
