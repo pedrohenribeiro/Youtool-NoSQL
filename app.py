@@ -73,21 +73,26 @@ def armazenarVideos(yt, db, playlist_id, since_dt):
 def coletarComentarios(yt: YouTube, db, video_ids):
     for vid in video_ids:
         for c in yt.video_comments(vid):
-            cid = c.get('comment_id') or c.get('id')
+            cid = c.get('id')
             if not cid:
                 continue
             rec = {
-                'video_id': vid,
-                'comment_id': cid,
-                'author': c.get('author_display_name'),
-                'text': c.get('text_display') or c.get('text_original'),
-                'published_at': c.get('published_at')
+                'video_id':          vid,
+                'comment_id':        cid,
+                'author':            c.get('author'),
+                'author_profile':    c.get('author_profile_image_url'),
+                'author_channel_id': c.get('author_channel_id'),
+                'text':              c.get('text'),
+                'likes':             c.get('likes'),
+                'published_at':      c.get('published_at'),
+                'replies':           c.get('replies'),
             }
             db.comments.update_one(
                 {'video_id': vid, 'comment_id': cid},
                 {'$set': rec},
                 upsert=True
             )
+
         print(f"Comentários salvos para vídeo {vid}")
 
 def armazenarTranscricoes(yt: YouTube, db, video_ids, lang, out_dir):
