@@ -5,6 +5,8 @@ from youtool import YouTube
 from youtool.utils import simplify_vtt
 from dotenv import load_dotenv
 import datetime
+import json
+from googleapiclient.discovery import build
 
 def load_config(env_path='.env'):
     load_dotenv(env_path)
@@ -34,9 +36,6 @@ def ensure_indexes(db):
     db.videos.create_index('video_id', unique=True)
     db.comments.create_index([('video_id', 1), ('comment_id', 1)], unique=True)
     db.transcriptions.create_index('video_id', unique=True)
-    db.livechats.create_index('video_id', unique=True)
-    db.superchats.create_index('video_id', unique=True)
-
 
 def buscarEArmazenarCanal(yt: YouTube, db, channel_url: str):
     channel_id = yt.channel_id_from_url(channel_url)
@@ -121,6 +120,72 @@ def armazenarTranscricoes(yt: YouTube, db, video_ids, lang, out_dir):
         )
         print(f"Transcrição salva para vídeo {vid}")
 
+def fetch_video_statistics(youtube_api_key, video_id):
+    youtube = build('youtube', 'v3', developerKey=youtube_api_key)
+    request = youtube.videos().list(
+        part='statistics',
+        id=video_id
+    )
+    response = request.execute()
+    items = response.get('items', [])
+    if not items:
+        return None
+    return items[0].get('statistics')
+
+def armazenarDetalhesVideos(yt: YouTube, db, video_ids, api_key):
+    for info in yt.videos_infos(video_ids):
+        vid = info.get('video_id') or info.get('id')
+        if not vid:
+            continue
+        
+        stats = info.get('statistics')
+        if not stats:
+            stats = fetch_video_statistics(api_key, vid)
+        
+        record = {
+            'video_id': vid,
+            'title': info.get('title'),
+            'description': info.get('description'),
+            'publishedAt': info.get('publishedAt'),
+            'duration': info.get('duration'),
+            'statistics': stats,
+            'tags': info.get('tags'),
+            'categoryId': info.get('categoryId'),
+            'status': info.get('status'),
+        }
+        db.videos.update_one({'video_id': vid}, {'$set': record}, upsert=True)
+        print(f"📄 Detalhes armazenados para vídeo {vid}")
+
+def exportar_estatisticas_json(db, output_path="estatisticas_videos.json"):
+    documentos = db.videos.find({}, {
+        "_id": 0,
+        "video_id": 1,
+        "title": 1,
+        "publishedAt": 1,
+        "statistics": 1
+    })
+
+    data = []
+    print("\n📦 Exportando estatísticas dos vídeos:\n")
+    for doc in documentos:
+        stats = doc.get("statistics") or {}
+        info = {
+            "video_id": doc.get("video_id"),
+            "title": doc.get("title"),
+            "publishedAt": doc.get("publishedAt"),
+            "viewCount": stats.get("viewCount"),
+            "likeCount": stats.get("likeCount"),
+            "commentCount": stats.get("commentCount")
+        }
+        data.append(info)
+
+        print(f"✅ Exportado: {info['title']} (views: {info['viewCount']}, likes: {info['likeCount']})")
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    print(f"\n🎉 Exportação concluída. Arquivo salvo em: {output_path}")
+
 def main():
     cfg = load_config()
     since_dt = None
@@ -139,7 +204,9 @@ def main():
     vids = armazenarVideos(yt, db, playlist_id, since_dt)
     limited_vids = vids[:10]
     coletarComentarios(yt, db, limited_vids)
+    armazenarDetalhesVideos(yt, db, limited_vids, cfg['api_keys'][0])
     armazenarTranscricoes(yt, db, limited_vids, cfg['transcription_lang'], cfg['transcription_dir'])
+    exportar_estatisticas_json(db)
 
 if __name__ == '__main__':
     main()
