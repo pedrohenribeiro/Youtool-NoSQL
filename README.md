@@ -36,7 +36,7 @@ Canal de Análise: [República Coisa de Nerd](https://www.youtube.com/@republica
 
  `/transcricoes` e `estatisticas_videos.json`
 
-https://github.com/user-attachments/assets/b33154c9-c8e6-4d62-9bae-80fe8486bb96
+https://github.com/user-attachments/assets/7a436ccf-ba4e-4756-acf4-f5184e077610
 
 No banco de dados
 
